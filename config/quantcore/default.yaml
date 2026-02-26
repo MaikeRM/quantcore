@@ -1,0 +1,110 @@
+# config/quantcore/default.yaml
+defaults:
+  - _self_
+
+quantcore:
+  version: 1.0.0
+
+  core:
+    math:
+      precision: double
+      default_epsilon: 1e-10
+      use_numba: true
+      parallel_threshold: 1000
+
+    time:
+      default_calendar: Brazil
+      default_daycount: bus252
+      date_format: "%Y-%m-%d"
+
+    utils:
+      validation:
+        strict: true
+        raise_on_error: true
+      caching:
+        enabled: true
+        type: lru
+        maxsize: 1024
+
+  market:
+    data:
+      default_source: yahoo
+      cache_ttl: 3600
+      retry_attempts: 3
+      timeout: 30
+
+    curves:
+      interpolation: cubic_spline
+      extrapolation: flat
+      bootstrap_method: iterative
+
+  pricing:
+    default_engine: auto
+    engines:
+      analytic:
+        precision: high
+
+      monte_carlo:
+        default_paths: 10000
+        default_steps: 252
+        random_seed: 42
+        variance_reduction:
+          antithetic: true
+          control_variates: true
+          importance_sampling: false
+
+      finite_difference:
+        grid_points: 100
+        time_steps: 1000
+        scheme: crank_nicolson
+
+      lattice:
+        steps: 100
+        method: cox_ross_rubinstein
+
+    calibration:
+      default_method: least_squares
+      default_optimizer: levenberg_marquardt
+      max_iterations: 1000
+      tolerance: 1e-8
+
+  risk:
+    var:
+      confidence_level: 0.95
+      horizon_days: 1
+      method: historical
+
+    greeks:
+      bump_size: 0.01
+      method: analytic
+
+  portfolio:
+    optimization:
+      solver: quadratic
+      max_iterations: 1000
+      tolerance: 1e-6
+
+  performance:
+    use_multiprocessing: true
+    max_workers: 4
+    chunk_size: 1000
+    memory_limit_gb: 4
+
+  logging:
+    level: INFO
+    format: json
+    handlers:
+      console:
+        enabled: true
+      file:
+        enabled: true
+        path: logs/quantcore.log
+        max_size_mb: 100
+        backup_count: 5
+
+  monitoring:
+    metrics:
+      enabled: true
+      port: 9090
+    tracing:
+      enabled: false

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantcore"
+dynamic = ["version"]
+description = "Biblioteca Quantitativa em Python com alta modularidade e performance"
+readme = "README.md"
+authors = [
+    { name = "Maike Ronald Mota"}
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.22.0",
+    "pandas>=1.4.0",
+    "scipy>=1.8.0",
+    "pydantic>=2.0.0",
+    "hydra-core>=1.3.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "quantcore._version.__version__"}
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=quantcore"
+testpaths = [
+    "tests",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py39', 'py310', 'py311', 'py312']
