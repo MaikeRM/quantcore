@@ -1,0 +1,39 @@
+# === Plano interno (não publicar) ===
+PLANO_MELHORIAS.md
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# === Virtual environments ===
+.venv/
+venv/
+ENV/
+
+# === Testing / Coverage ===
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# === Logs ===
+logs/
+*.log
+
+# === Pastas internas ===
+blog/
+backlog/
+docs/
