@@ -1,0 +1,2607 @@
+Metadata-Version: 2.4
+Name: quantcore
+Version: 0.1.0
+Summary: Biblioteca Quantitativa em Python com alta modularidade e performance
+Author: Maike Ronald Mota
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.22.0
+Requires-Dist: pandas>=1.4.0
+Requires-Dist: scipy>=1.8.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: hydra-core>=1.3.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+
+# Estrutura Detalhada da Biblioteca Quantitativa em Python
+
+Esta estrutura oferece:
+
+1. **Modularidade extrema**: Cada componente é independente e substituível
+2. **Extensibilidade**: Novos modelos, engines e instrumentos podem ser adicionados sem modificar código existente
+3. **Performance**: Otimizações específicas por método numérico
+4. **Testabilidade**: Isolamento perfeito para testes unitários
+5. **Manutenibilidade**: Baixo acoplamento, alta coesão
+6. **Documentação embutida**: Docstrings completas com exemplos
+7. **Configurabilidade**: Tudo pode ser configurado via arquivos YAML
+8. **Produção-ready**: Logging, monitoring, error handling robustos
+
+Cada módulo pode ser desenvolvido e testado independentemente, permitindo desenvolvimento paralelo por múltiplas equipes.
+
+
+## ARQUITETURA COMPLETA E MODULAR
+
+```
+quantcore/
+├── __init__.py
+│
+├── _version.py                     # Versionamento semântico
+├── _constants.py                   # Constantes globais
+│
+├── core/                           # Núcleo independente de domínio
+│   ├── __init__.py
+│   │
+│   ├── base/                       # Classes e interfaces abstratas
+│   │   ├── __init__.py
+│   │   ├── abc/
+│   │   │   ├── __init__.py
+│   │   │   ├── instrument.py      # FinancialInstrument ABC
+│   │   │   ├── pricer.py          # PricingEngine ABC
+│   │   │   ├── model.py           # StochasticModel ABC
+│   │   │   ├── curve.py           # Curve ABC
+│   │   │   └── solver.py          # NumericalSolver ABC
+│   │   │
+│   │   ├── types/
+│   │   │   ├── __init__.py
+│   │   │   ├── enums.py           # Enums (OptionType, DayCount, etc.)
+│   │   │   ├── aliases.py         # Type aliases (Price, Volatility, etc.)
+│   │   │   └── protocols.py       # Protocols/Interfaces
+│   │   │
+│   │   └── contracts/
+│   │       ├── __init__.py
+│   │       ├── metadata.py        # Instrument metadata
+│   │       └── specifications.py  # Contract specs
+│   │
+│   ├── math/                       # Matemática financeira
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── calculus/
+│   │   │   ├── __init__.py
+│   │   │   ├── differentiation.py # Greeks, automatic diff
+│   │   │   ├── integration.py     # Quadrature, MC integration
+│   │   │   └── optimization.py    # Root finding, minimization
+│   │   │
+│   │   ├── statistics/
+│   │   │   ├── __init__.py
+│   │   │   ├── distributions/     # Distribuições customizadas
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── normal.py
+│   │   │   │   ├── lognormal.py
+│   │   │   │   ├── student_t.py
+│   │   │   │   └── mixture.py
+│   │   │   ├── moments.py         # Skewness, kurtosis
+│   │   │   ├── copulas.py         # Gaussian, t-copula
+│   │   │   └── hypothesis.py      # Statistical tests
+│   │   │
+│   │   ├── interpolation/
+│   │   │   ├── __init__.py
+│   │   │   ├── splines/           # Cubic, tension splines
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── cubic_spline.py
+│   │   │   │   ├── monotone_spline.py
+│   │   │   │   └── tension_spline.py
+│   │   │   ├── kernel.py          # Kernel smoothing
+│   │   │   ├── parametric.py      # Nelson-Siegel, Svensson
+│   │   │   └── extrapolation.py   # Flat, linear extrapolation
+│   │   │
+│   │   ├── linear_algebra/
+│   │   │   ├── __init__.py
+│   │   │   ├── decompositions.py  # Cholesky, QR, SVD
+│   │   │   ├── solvers.py         # Linear systems
+│   │   │   └── matrix_ops.py      # Special finance matrices
+│   │   │
+│   │   └── random/
+│   │       ├── __init__.py
+│   │       ├── generators/        # RNG implementations
+│   │       │   ├── __init__.py
+│   │       │   ├── mersenne_twister.py
+│   │       │   ├── sobol.py
+│   │       │   └── halton.py
+│   │       ├── transforms.py      # Box-Muller, etc.
+│   │       └── sequences.py       # Low-discrepancy sequences
+│   │
+│   ├── time/                       # Manipulação de tempo
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── date/
+│   │   │   ├── __init__.py
+│   │   │   ├── date.py           # Date class with operations
+│   │   │   ├── period.py         # Period (1M, 3Y, etc.)
+│   │   │   └── frequency.py      # Frequency enum
+│   │   │
+│   │   ├── calendar/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_calendar.py
+│   │   │   ├── region/           # Calendários por região
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── brazil.py
+│   │   │   │   ├── usa.py
+│   │   │   │   ├── uk.py
+│   │   │   │   └── target.py
+│   │   │   └── business_day.py   # Business day conventions
+│   │   │
+│   │   ├── daycount/
+│   │   │   ├── __init__.py
+│   │   │   ├── conventions.py    # DayCount enum
+│   │   │   ├── calculators/      # Implementações
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── actual_360.py
+│   │   │   │   ├── actual_365.py
+│   │   │   │   ├── thirty_360.py
+│   │   │   │   └── bus_252.py
+│   │   │   └── day_counter.py    # Interface principal
+│   │   │
+│   │   └── schedule/
+│   │       ├── __init__.py
+│   │       ├── generator.py      # Gera schedules de pagamento
+│   │       ├── leg.py            # Payment leg
+│   │       └── adjustments.py    # Date adjustments
+│   │
+│   ├── utils/                      # Utilitários gerais
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── validation/
+│   │   │   ├── __init__.py
+│   │   │   ├── validators.py     # Validators específicos
+│   │   │   ├── schemas.py        # Pydantic schemas
+│   │   │   └── constraints.py    # Domain constraints
+│   │   │
+│   │   ├── decorators/
+│   │   │   ├── __init__.py
+│   │   │   ├── validation.py     # @validate_input
+│   │   │   ├── caching.py        # @cached, @lru_cache
+│   │   │   ├── timing.py         # @timed
+│   │   │   ├── parallel.py       # @parallelize
+│   │   │   └── dispatch.py       # @dispatch (multiple dispatch)
+│   │   │
+│   │   ├── exceptions/
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py           # quantcoreError
+│   │   │   ├── validation.py     # ValidationError
+│   │   │   ├── numerical.py      # NumericalError
+│   │   │   └── convergence.py    # ConvergenceError
+│   │   │
+│   │   ├── serialization/
+│   │   │   ├── __init__.py
+│   │   │   ├── json_encoder.py   # Custom JSON encoder
+│   │   │   ├── pickle.py         # Safe pickling
+│   │   │   └── protobuf.py       # Protocol buffers
+│   │   │
+│   │   ├── logging/
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py         # Logging configuration
+│   │   │   ├── formatters.py     # Custom formatters
+│   │   │   └── handlers.py       # Custom handlers
+│   │   │
+│   │   └── performance/
+│   │       ├── __init__.py
+│   │       ├── profilers.py      # CPU/memory profiling
+│   │       ├── benchmarks.py     # Benchmark utilities
+│   │       └── optimizers.py     # Performance optimizations
+│
+├── market/                         # Dados e modelos de mercado
+│   ├── __init__.py
+│   │
+│   ├── data/                       # Acesso a dados
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── sources/               # Fontes de dados
+│   │   │   ├── __init__.py
+│   │   │   ├── base_source.py    # ABC para data sources
+│   │   │   ├── yahoo.py          # Yahoo Finance
+│   │   │   ├── fred.py           # FRED API
+│   │   │   ├── quandl.py         # Quandl
+│   │   │   ├── bloomberg.py      # Bloomberg (se disponível)
+│   │   │   ├── refinitiv.py      # Refinitiv Eikon
+│   │   │   └── local.py          # Arquivos locais
+│   │   │
+│   │   ├── models/                # Modelos de dados
+│   │   │   ├── __init__.py
+│   │   │   ├── quote.py          # Bid/ask/mid
+│   │   │   ├── tick.py           # Tick data
+│   │   │   ├── bar.py            # OHLC bars
+│   │   │   └── fundamental.py    # Dados fundamentais
+│   │   │
+│   │   ├── managers/              # Gerenciamento de dados
+│   │   │   ├── __init__.py
+│   │   │   ├── cache/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── base_cache.py
+│   │   │   │   ├── memory_cache.py
+│   │   │   │   ├── redis_cache.py
+│   │   │   │   └── disk_cache.py
+│   │   │   ├── data_manager.py   # Manager principal
+│   │   │   ├── symbol_manager.py # Gerenciamento de símbolos
+│   │   │   └── universe.py       # Universos de ativos
+│   │   │
+│   │   └── processors/            # Processamento de dados
+│   │       ├── __init__.py
+│   │       ├── cleaners/         # Limpeza de dados
+│   │       │   ├── __init__.py
+│   │       │   ├── outlier.py    # Remoção de outliers
+│   │       │   ├── missing.py    # Tratamento de missing
+│   │       │   └── adjusters.py  # Ajustes (splits, dividends)
+│   │       ├── transformers/     # Transformações
+│   │       │   ├── __init__.py
+│   │       │   ├── returns.py    # Cálculo de retornos
+│   │       │   ├── volatility.py # Volatilidade
+│   │       │   └── technical.py  # Indicadores técnicos
+│   │       └── aggregators/      # Agregação
+│   │           ├── __init__.py
+│   │           ├── resamplers.py # Resampling temporal
+│   │           └── rollups.py    # Agregação cross-section
+│   │
+│   ├── models/                     # Modelos de mercado
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── volatility/
+│   │   │   ├── __init__.py
+│   │   │   ├── estimators/       # Estimadores de vol
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── historical.py
+│   │   │   │   ├── garch.py      # GARCH models
+│   │   │   │   ├── ewma.py       # EWMA volatility
+│   │   │   │   └── realized.py   # Realized volatility
+│   │   │   ├── surfaces/         # Superfícies de volatilidade
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── base_surface.py
+│   │   │   │   ├── delta_surface.py
+│   │   │   │   └── moneyness_surface.py
+│   │   │   └── dynamics/         # Modelos dinâmicos
+│   │   │       ├── __init__.py
+│   │   │       ├── local_vol.py  # Local volatility
+│   │   │       ├── stochastic_vol.py
+│   │   │       └── jump_diffusion.py
+│   │   │
+│   │   ├── correlation/
+│   │   │   ├── __init__.py
+│   │   │   ├── estimators.py     # Correlation estimation
+│   │   │   ├── matrices.py       # Correlation matrices
+│   │   │   └── models.py         # Correlation models
+│   │   │
+│   │   └── factors/               # Modelos de fatores
+│   │       ├── __init__.py
+│   │       ├── pca.py            # PCA
+│   │       ├── apca.py           # Asymptotic PCA
+│   │       └── statistical.py    # Statistical factor models
+│   │
+│   └── curves/                     # Curvas de mercado
+│       ├── __init__.py
+│       │
+│       ├── base/                  # Base para todas curvas
+│       │   ├── __init__.py
+│       │   ├── term_structure.py  # ABC
+│       │   ├── curve_node.py      # Ponto na curva
+│       │   └── bootstrap_helper.py # Helpers para bootstrapping
+│       │
+│       ├── yield/                 # Curvas de juros
+│       │   ├── __init__.py
+│       │   ├── yield_curve.py     # Yield curve principal
+│       │   ├── zero_curve.py      # Zero curve
+│       │   ├── forward_curve.py   # Forward curve
+│       │   ├── discount_curve.py  # Discount curve
+│       │   ├── builders/          # Construção de curvas
+│       │   │   ├── __init__.py
+│       │   │   ├── bootstrap.py   # Bootstrapping
+│       │   │   ├── smoothing.py   # Smoothing methods
+│       │   │   └── parametric.py  # Parametric models
+│       │   └── models/            # Modelos paramétricos
+│       │       ├── __init__.py
+│       │       ├── nelson_siegel.py
+│       │       ├── svensson.py
+│       │       └── vasicek.py
+│       │
+│       ├── volatility/            # Curvas de volatilidade
+│       │   ├── __init__.py
+│       │   ├── vol_curve.py
+│       │   ├── vol_surface.py
+│       │   └── builders/
+│       │       ├── __init__.py
+│       │       ├── spline_builder.py
+│       │       └── sabr_builder.py
+│       │
+│       └── credit/                # Curvas de crédito
+│           ├── __init__.py
+│           ├── survival_curve.py
+│           ├── hazard_curve.py
+│           └── builders/
+│               ├── __init__.py
+│               └── cds_bootstrap.py
+│
+├── instruments/                    # Instrumentos financeiros
+│   ├── __init__.py
+│   │
+│   ├── base/                       # Base para todos instrumentos
+│   │   ├── __init__.py
+│   │   ├── instrument.py          # FinancialInstrument ABC
+│   │   ├── payoff.py              # Payoff functions
+│   │   ├── cashflow.py            # Cash flow representation
+│   │   └── settlement.py          # Settlement details
+│   │
+│   ├── equity/                     # Instrumentos de equity
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── stocks/
+│   │   │   ├── __init__.py
+│   │   │   ├── common_stock.py
+│   │   │   ├── preferred_stock.py
+│   │   │   └── adr.py
+│   │   │
+│   │   ├── indices/
+│   │   │   ├── __init__.py
+│   │   │   ├── price_index.py
+│   │   │   ├── total_return_index.py
+│   │   │   └── custom_index.py
+│   │   │
+│   │   ├── etfs/
+│   │   │   ├── __init__.py
+│   │   │   ├── equity_etf.py
+│   │   │   ├── bond_etf.py
+│   │   │   └── commodity_etf.py
+│   │   │
+│   │   └── funds/
+│   │       ├── __init__.py
+│   │       ├── mutual_fund.py
+│   │       └── hedge_fund_share.py
+│   │
+│   ├── fixed_income/              # Renda fixa
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── bonds/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_bond.py      # Bond ABC
+│   │   │   ├── zero_coupon.py    # Zero coupon bond
+│   │   │   ├── fixed_rate.py     # Fixed rate bond
+│   │   │   ├── floating_rate.py  # Floating rate note
+│   │   │   ├── inflation_linked.py
+│   │   │   ├── convertible.py    # Convertible bond
+│   │   │   └── perpetual.py      # Perpetual bond
+│   │   │
+│   │   ├── swaps/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_swap.py      # Swap ABC
+│   │   │   ├── interest_rate.py  # IRS
+│   │   │   ├── basis_swap.py     # Basis swap
+│   │   │   ├── asset_swap.py     # Asset swap
+│   │   │   ├── inflation_swap.py
+│   │   │   └── cross_currency.py
+│   │   │
+│   │   ├── futures/
+│   │   │   ├── __init__.py
+│   │   │   ├── bond_future.py
+│   │   │   ├── note_future.py
+│   │   │   └── bill_future.py
+│   │   │
+│   │   └── repos/
+│   │       ├── __init__.py
+│   │       ├── repo.py
+│   │       └── reverse_repo.py
+│   │
+│   ├── derivatives/               # Derivativos
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── options/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_option.py    # Option ABC
+│   │   │   ├── european.py       # European option
+│   │   │   ├── american.py       # American option
+│   │   │   ├── bermudan.py       # Bermudan option
+│   │   │   ├── asian.py          # Asian option
+│   │   │   ├── barrier.py        # Barrier option
+│   │   │   ├── binary.py         # Binary/Digital option
+│   │   │   ├── lookback.py       # Lookback option
+│   │   │   ├── compound.py       # Compound option
+│   │   │   └── chooser.py        # Chooser option
+│   │   │
+│   │   ├── futures/
+│   │   │   ├── __init__.py
+│   │   │   ├── equity_future.py
+│   │   │   ├── index_future.py
+│   │   │   ├── commodity_future.py
+│   │   │   └── currency_future.py
+│   │   │
+│   │   ├── forwards/
+│   │   │   ├── __init__.py
+│   │   │   ├── equity_forward.py
+│   │   │   ├── fx_forward.py
+│   │   │   └── commodity_forward.py
+│   │   │
+│   │   └── swaps/
+│   │       ├── __init__.py
+│   │       ├── equity_swap.py
+│   │       ├── total_return_swap.py
+│   │       ├── variance_swap.py
+│   │       └── volatility_swap.py
+│   │
+│   ├── fx/                        # Forex
+│   │   ├── __init__.py
+│   │   ├── spot.py               # Spot FX
+│   │   ├── forward.py            # FX forward
+│   │   ├── option.py             # FX option
+│   │   └── swap.py               # FX swap
+│   │
+│   ├── commodities/              # Commodities
+│   │   ├── __init__.py
+│   │   ├── energy/
+│   │   │   ├── __init__.py
+│   │   │   ├── crude_oil.py
+│   │   │   ├── natural_gas.py
+│   │   │   └️── electricity.py
+│   │   ├── metals/
+│   │   │   ├── __init__.py
+│   │   │   ├── gold.py
+│   │   │   ├── silver.py
+│   │   │   └── copper.py
+│   │   └── agriculture/
+│   │       ├── __init__.py
+│   │       ├── corn.py
+│   │       ├── soybeans.py
+│   │       └── coffee.py
+│   │
+│   └── structured/               # Produtos estruturados
+│       ├── __init__.py
+│       │
+│       ├── credit/
+│       │   ├── __init__.py
+│       │   ├── cdo.py           # Collateralized Debt Obligation
+│       │   ├── cds.py           # Credit Default Swap
+│       │   └── cln.py           # Credit Linked Note
+│       │
+│       ├── rates/
+│       │   ├── __init__.py
+│       │   ├── range_accrual.py
+│       │   ├── inverse_floater.py
+│       │   ├── snowball.py
+│       │   └── target_redemption.py
+│       │
+│       ├── equity/
+│       │   ├── __init__.py
+│       │   ├── autocallable.py
+│       │   ├── reverse_convertible.py
+│       │   └── accumulator.py
+│       │
+│       └── hybrid/
+│           ├── __init__.py
+│           ├── prdc.py          # Power Reverse Dual Currency
+│           └── cross_asset.py
+│
+├── pricing/                       # Engines de precificação
+│   ├── __init__.py
+│   │
+│   ├── engines/                   # Engines de precificação
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── base/                 # Base para engines
+│   │   │   ├── __init__.py
+│   │   │   ├── pricing_engine.py # PricingEngine ABC
+│   │   │   ├── npv_calculator.py # NPV calculator
+│   │   │   └── results.py        # Pricing results container
+│   │   │
+│   │   ├── analytic/             # Fórmulas fechadas
+│   │   │   ├── __init__.py
+│   │   │   ├── black_scholes.py  # Black-Scholes-Merton
+│   │   │   ├── bachelier.py      # Bachelier/Normal model
+│   │   │   ├── vasicek_bond.py   # Vasicek bond pricing
+│   │   │   ├── hull_white.py     # Hull-White analytic
+│   │   │   └── sabr.py           # SABR analytic approx
+│   │   │
+│   │   ├── lattice/              # Árvores/lattices
+│   │   │   ├── __init__.py
+│   │   │   ├── base_lattice.py   # Base lattice
+│   │   │   ├── binomial/         # Binomial trees
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── cox_ross_rubinstein.py
+│   │   │   │   ├── jarrow_rudd.py
+│   │   │   │   └── tian.py
+│   │   │   ├── trinomial/        # Trinomial trees
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── hull_white_tree.py
+│   │   │   │   └── black_karasinski.py
+│   │   │   ├── quadrinomial/     # 2D trees
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── two_factor.py
+│   │   │   └── lattice_pricer.py # Lattice pricing engine
+│   │   │
+│   │   ├── finite_difference/    # PDE methods
+│   │   │   ├── __init__.py
+│   │   │   ├── pde_solvers/      # Solvers PDE
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── explicit.py   # Explicit scheme
+│   │   │   │   ├── implicit.py   # Implicit scheme
+│   │   │   │   ├── crank_nicolson.py
+│   │   │   │   └── alternating_direction.py # ADI for 2D
+│   │   │   ├── grids/            # Grid definitions
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── uniform_grid.py
+│   │   │   │   ├── nonuniform_grid.py
+│   │   │   │   └── adaptive_grid.py
+│   │   │   ├── boundary/         # Boundary conditions
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── dirichlet.py
+│   │   │   │   ├── neumann.py
+│   │   │   │   └── linearity.py
+│   │   │   └── fd_pricer.py      # FD pricing engine
+│   │   │
+│   │   ├── monte_carlo/          # Monte Carlo methods
+│   │   │   ├── __init__.py
+│   │   │   ├── path_generators/  # Path generation
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── brownian_bridge.py
+│   │   │   │   ├── euler_scheme.py
+│   │   │   │   ├── milstein_scheme.py
+│   │   │   │   └── exact_simulation.py
+│   │   │   ├── variance_reduction/ # Variance reduction
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── antithetic.py
+│   │   │   │   ├── control_variates.py
+│   │   │   │   ├── importance_sampling.py
+│   │   │   │   └── stratified_sampling.py
+│   │   │   ├── payoff_evaluators/ # Payoff evaluation
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── european_payoff.py
+│   │   │   │   ├── asian_payoff.py
+│   │   │   │   └── barrier_payoff.py
+│   │   │   ├── random_numbers/   # Random number generation
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── pseudo_random.py
+│   │   │   │   ├── quasi_random.py
+│   │   │   │   └── low_discrepancy.py
+│   │   │   └── mc_pricer.py      # MC pricing engine
+│   │   │
+│   │   ├── fourier/              # Fourier methods
+│   │   │   ├── __init__.py
+│   │   │   ├── characteristic_functions/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── black_scholes.py
+│   │   │   │   ├── heston.py
+│   │   │   │   └── levy.py
+│   │   │   ├── transforms/       # Fourier transforms
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── fft.py        # Fast Fourier Transform
+│   │   │   │   ├── cos.py        # COS method
+│   │   │   │   └── frft.py       # Fractional FFT
+│   │   │   └── fourier_pricer.py # Fourier pricing engine
+│   │   │
+│   │   └── hybrid/               # Métodos híbridos
+│   │       ├── __init__.py
+│   │       ├── pde_mc.py         # PDE-MC hybrid
+│   │       ├── lattice_mc.py     # Lattice-MC hybrid
+│   │       └── analytic_mc.py    # Analytic-MC hybrid
+│   │
+│   ├── models/                    # Modelos estocásticos
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── equity/
+│   │   │   ├── __init__.py
+│   │   │   ├── geometric_brownian.py   # GBM
+│   │   │   ├── heston.py               # Heston
+│   │   │   ├── bates.py                # Bates (Heston + jumps)
+│   │   │   ├── svi.py                  # Stochastic Vol with Jumps
+│   │   │   ├── local_vol.py            # Local volatility
+│   │   │   ├── cev.py                  # CEV model
+│   │   │   └── sabr.py                 # SABR
+│   │   │
+│   │   ├── rates/
+│   │   │   ├── __init__.py
+│   │   │   ├── vasicek.py              # Vasicek
+│   │   │   ├── cox_ingersoll_ross.py   # CIR
+│   │   │   ├── hull_white.py           # Hull-White
+│   │   │   ├── black_karasinski.py     # Black-Karasinski
+│   │   │   ├── heath_jarrow_morton.py  # HJM
+│   │   │   ├── libor_market.py         # LMM
+│   │   │   └── swap_market.py          # SMM
+│   │   │
+│   │   ├── fx/
+│   │   │   ├── __init__.py
+│   │   │   ├── garman_kohlhagen.py     # Garman-Kohlhagen
+│   │   │   ├── heston_fx.py            # Heston for FX
+│   │   │   └── stochastic_interest.py  # Stochastic interest rates
+│   │   │
+│   │   ├── credit/
+│   │   │   ├── __init__.py
+│   │   │   ├── merton.py               # Merton
+│   │   │   ├── black_cox.py            # Black-Cox
+│   │   │   ├── reduced_form.py         # Reduced form
+│   │   │   ├── copula.py               # Copula models
+│   │   │   └── intensity.py            # Intensity models
+│   │   │
+│   │   ├── inflation/
+│   │   │   ├── __init__.py
+│   │   │   ├── jarrow_yildirim.py      # Jarrow-Yildirim
+│   │   │   └── market_model.py         # Inflation market model
+│   │   │
+│   │   └── multi_asset/           # Modelos multi-ativos
+│   │       ├── __init__.py
+│   │       ├── multivariate_gbm.py
+│   │       ├── stochastic_correlation.py
+│   │       └── factor_models.py
+│   │
+│   ├── calibration/               # Calibração de modelos
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── optimizers/           # Otimizadores
+│   │   │   ├── __init__.py
+│   │   │   ├── levenberg_marquardt.py
+│   │   │   ├── differential_evolution.py
+│   │   │   ├── simulated_annealing.py
+│   │   │   └── particle_swarm.py
+│   │   │
+│   │   ├── objectives/           # Funções objetivo
+│   │   │   ├── __init__.py
+│   │   │   ├── mse.py            # Mean squared error
+│   │   │   ├── rmse.py           # Root MSE
+│   │   │   ├── mae.py            # Mean absolute error
+│   │   │   └── relative_error.py
+│   │   │
+│   │   ├── constraints/          # Restrições
+│   │   │   ├── __init__.py
+│   │   │   ├── bounds.py         # Parameter bounds
+│   │   │   ├── inequalities.py   # Inequality constraints
+│   │   │   └── equalities.py     # Equality constraints
+│   │   │
+│   │   └── calibrators/          # Calibradores específicos
+│   │       ├── __init__.py
+│   │       ├── heston_calibrator.py
+│   │       ├── sabr_calibrator.py
+│   │       ├── hull_white_calibrator.py
+│   │       └── local_vol_calibrator.py
+│   │
+│   └── risk/                     # Sensitividades e risco
+│       ├── __init__.py
+│       │
+│       ├── greeks/               # Grecas
+│       │   ├── __init__.py
+│       │   ├── first_order/      # Grecas de primeira ordem
+│       │   │   ├── __init__.py
+│       │   │   ├── delta.py
+│       │   │   ├── vega.py
+│       │   │   ├── theta.py
+│       │   │   ├── rho.py
+│       │   │   └── phi.py        # Dividend rho
+│       │   ├── second_order/     # Grecas de segunda ordem
+│       │   │   ├── __init__.py
+│       │   │   ├── gamma.py
+│       │   │   ├── vanna.py
+│       │   │   ├── volga.py
+│       │   │   ├── charm.py      # Delta decay
+│       │   │   ├── veta.py       # Vega decay
+│       │   │   └── vera.py       # Rho decay
+│       │   ├── third_order/      # Grecas de terceira ordem
+│       │   │   ├── __init__.py
+│       │   │   ├── speed.py      # Gamma decay
+│       │   │   ├── zomma.py      # Gamma sensitivity to vol
+│       │   │   └── ultima.py     # Volga sensitivity to vol
+│       │   ├── cross_greeks/     # Grecas cruzadas
+│       │   │   ├── __init__.py
+│       │   │   ├── correlation_gamma.py
+│       │   │   └── cross_vanna.py
+│       │   └── greek_calculator.py # Calculador unificado
+│       │
+│       ├── measures/             # Medidas de risco
+│       │   ├── __init__.py
+│       │   ├── pnl_explain.py    # P&L attribution
+│       │   ├── risk_buckets.py   # Risk bucketing
+│       │   ├── scenario_pnl.py   # Scenario P&L
+│       │   └── sensitivities.py  # Sensitivities aggregation
+│       │
+│       └── attribution/          # Attribution de risco
+│           ├── __init__.py
+│           ├── delta_normal.py   # Delta-normal VaR
+│           ├── component_var.py  # Component VaR
+│           ├── incremental_var.py # Incremental VaR
+│           └── marginal_var.py   # Marginal VaR
+│
+├── risk/                         # Gestão de risco
+│   ├── __init__.py
+│   │
+│   ├── metrics/                  # Métricas de risco
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── market_risk/
+│   │   │   ├── __init__.py
+│   │   │   ├── value_at_risk/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── historical.py
+│   │   │   │   ├── parametric.py
+│   │   │   │   ├── monte_carlo.py
+│   │   │   │   └── hybrid.py
+│   │   │   ├── expected_shortfall.py
+│   │   │   ├── conditional_var.py
+│   │   │   ├── expected_tail_loss.py
+│   │   │   └── spectral_measures.py
+│   │   │
+│   │   ├── credit_risk/
+│   │   │   ├── __init__.py
+│   │   │   ├── probability_of_default.py
+│   │   │   ├── loss_given_default.py
+│   │   │   ├── exposure_at_default.py
+│   │   │   ├── credit_var.py
+│   │   │   └── credit_es.py
+│   │   │
+│   │   ├── liquidity_risk/
+│   │   │   ├── __init__.py
+│   │   │   ├── liquidity_var.py
+│   │   │   ├── bid_ask_spread.py
+│   │   │   ├── market_impact.py
+│   │   │   └── liquidation_cost.py
+│   │   │
+│   │   ├── operational_risk/
+│   │   │   ├── __init__.py
+│   │   │   ├── loss_distribution.py
+│   │   │   └── scenario_analysis.py
+│   │   │
+│   │   └── performance/
+│   │       ├── __init__.py
+│   │       ├── sharpe_ratio.py
+│   │       ├── sortino_ratio.py
+│   │       ├── calmar_ratio.py
+│   │       ├── information_ratio.py
+│   │       ├── max_drawdown.py
+│   │       └── ulcer_index.py
+│   │
+│   ├── models/                   # Modelos de risco
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── credit/
+│   │   │   ├── __init__.py
+│   │   │   ├── structural/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── merton_1974.py
+│   │   │   │   ├── black_cox_1976.py
+│   │   │   │   └── longstaff_schwartz_1995.py
+│   │   │   ├── reduced_form/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── jarrow_turnbull_1995.py
+│   │   │   │   ├── duffie_singleton_1999.py
+│   │   │   │   └── lando_1998.py
+│   │   │   └── credit_metrics/
+│   │   │       ├── __init__.py
+│   │   │       └── transition_matrix.py
+│   │   │
+│   │   ├── market/
+│   │   │   ├── __init__.py
+│   │   │   ├── historical_simulation.py
+│   │   │   ├── filtered_historical.py
+│   │   │   ├── monte_carlo_simulation.py
+│   │   │   └── extreme_value.py
+│   │   │
+│   │   └── portfolio/
+│   │       ├── __init__.py
+│   │       ├── factor_models.py
+│   │       ├── copula_models.py
+│   │       └── dependency_models.py
+│   │
+│   ├── simulation/               # Simulação de risco
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── scenario_generation/
+│   │   │   ├── __init__.py
+│   │   │   ├── historical.py
+│   │   │   ├── monte_carlo.py
+│   │   │   ├── stress_scenarios.py
+│   │   │   └── regime_based.py
+│   │   │
+│   │   ├── copula_simulation/
+│   │   │   ├── __init__.py
+│   │   │   ├── gaussian_copula.py
+│   │   │   ├── t_copula.py
+│   │   │   ├── clayton_copula.py
+│   │   │   └── gumbel_copula.py
+│   │   │
+│   │   └── loss_simulation/
+│   │       ├── __init__.py
+│   │       ├── aggregate_loss.py
+│   │       ├── severity_distribution.py
+│   │       └── frequency_distribution.py
+│   │
+│   └── management/               # Gestão de risco
+│       ├── __init__.py
+│       │
+│       ├── portfolio_risk/
+│       │   ├── __init__.py
+│       │   ├── risk_decomposition.py
+│       │   ├── risk_contribution.py
+│       │   └── risk_budgeting.py
+│       │
+│       ├── hedging/
+│       │   ├── __init__.py
+│       │   ├── delta_hedging.py
+│       │   ├── gamma_hedging.py
+│       │   ├── vega_hedging.py
+│       │   └── minimum_variance.py
+│       │
+│       ├── limits/
+│       │   ├── __init__.py
+│       │   ├── limit_monitoring.py
+│       │   ├── limit_utilization.py
+│       │   └── limit_breaches.py
+│       │
+│       └── reporting/
+│           ├── __init__.py
+│           ├── risk_dashboard.py
+│           ├── risk_report.py
+│           └── regulatory_reports.py
+│
+├── portfolio/                    # Gestão de portfólio
+│   ├── __init__.py
+│   │
+│   ├── construction/             # Construção de portfólio
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── optimization/
+│   │   │   ├── __init__.py
+│   │   │   ├── mean_variance.py
+│   │   │   ├── black_litterman.py
+│   │   │   ├── risk_parity.py
+│   │   │   ├── minimum_variance.py
+│   │   │   ├── maximum_sharpe.py
+│   │   │   └── efficient_frontier.py
+│   │   │
+│   │   ├── constraints/
+│   │   │   ├── __init__.py
+│   │   │   ├── weight_constraints.py
+│   │   │   ├── turnover_constraints.py
+│   │   │   ├── cardinality_constraints.py
+│   │   │   └── factor_exposure.py
+│   │   │
+│   │   ├── objectives/
+│   │   │   ├── __init__.py
+│   │   │   ├── return_objectives.py
+│   │   │   ├── risk_objectives.py
+│   │   │   ├── utility_objectives.py
+│   │   │   └── tracking_error.py
+│   │   │
+│   │   └── solvers/
+│   │       ├── __init__.py
+│   │       ├── quadratic.py      # QP solvers
+│   │       ├── convex.py        # Convex optimization
+│   │       ├── heuristic.py     # Heuristic methods
+│   │       └── gradient_based.py
+│   │
+│   ├── analytics/                # Análise de portfólio
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── performance/
+│   │   │   ├── __init__.py
+│   │   │   ├── returns.py       # Portfolio returns
+│   │   │   ├── volatility.py    # Portfolio volatility
+│   │   │   ├── drawdown.py      # Drawdown analysis
+│   │   │   └── risk_adjusted.py # Risk-adjusted returns
+│   │   │
+│   │   ├── attribution/
+│   │   │   ├── __init__.py
+│   │   │   ├── brinson_model.py
+│   │   │   ├── menchero_model.py
+│   │   │   ├── campisi_model.py
+│   │   │   └── factor_attribution.py
+│   │   │
+│   │   ├── concentration/
+│   │   │   ├── __init__.py
+│   │   │   ├── herfindahl.py    # Herfindahl index
+│   │   │   ├── gini_coefficient.py
+│   │   │   ├── entropy.py       # Entropy measure
+│   │   │   └── top_n_concentration.py
+│   │   │
+│   │   └── characteristics/
+│   │       ├── __init__.py
+│   │       ├── factor_exposures.py
+│   │       ├── style_analysis.py
+│   │       ├── liquidity_metrics.py
+│   │       └── turnover_metrics.py
+│   │
+│   ├── rebalancing/             # Rebalanceamento
+│   │   ├── __init__.py
+│   │   ├── strategies/
+│   │   │   ├── __init__.py
+│   │   │   ├── calendar.py      # Calendar-based
+│   │   │   ├── threshold.py     # Threshold-based
+│   │   │   ├── optimal.py       # Optimal rebalancing
+│   │   │   └── adaptive.py      # Adaptive rebalancing
+│   │   ├── costs.py             # Transaction costs
+│   │   └── optimizers.py        # Rebalancing optimizers
+│   │
+│   └── benchmarks/              # Benchmarks
+│       ├── __init__.py
+│       ├── index_tracking.py    # Index tracking
+│       ├── peer_group.py        # Peer group comparison
+│       └── custom_benchmark.py  # Custom benchmarks
+│
+├── analytics/                    # Análises avançadas
+│   ├── __init__.py
+│   │
+│   ├── backtesting/             # Backtesting
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── frameworks/
+│   │   │   ├── __init__.py
+│   │   │   ├── event_driven.py
+│   │   │   ├── vectorized.py
+│   │   │   └── walk_forward.py
+│   │   │
+│   │   ├── metrics/
+│   │   │   ├── __init__.py
+│   │   │   ├── performance.py
+│   │   │   ├── risk.py
+│   │   │   ├── trading.py
+│   │   │   └── statistical.py
+│   │   │
+│   │   ├── scenarios/
+│   │   │   ├── __init__.py
+│   │   │   ├── historical.py
+│   │   │   ├── monte_carlo.py
+│   │   │   └── stress.py
+│   │   │
+│   │   └── reports/
+│   │       ├── __init__.py
+│   │       ├── tear_sheet.py
+│   │       ├── performance_report.py
+│   │       └── risk_report.py
+│   │
+│   ├── signals/                 # Sinais e alfas
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── generation/
+│   │   │   ├── __init__.py
+│   │   │   ├── fundamental.py
+│   │   │   ├── technical.py
+│   │   │   ├── quantitative.py
+│   │   │   └── alternative.py
+│   │   │
+│   │   ├── processing/
+│   │   │   ├── __init__.py
+│   │   │   ├── normalization.py
+│   │   │   ├── winsorization.py
+│   │   │   ├── neutralization.py
+│   │   │   └── combination.py
+│   │   │
+│   │   ├── evaluation/
+│   │   │   ├── __init__.py
+│   │   │   ├── ic_analysis.py   # Information coefficient
+│   │   │   ├── turnover.py
+│   │   │   ├── decay.py
+│   │   │   └── stability.py
+│   │   │
+│   │   └── combination/
+│   │       ├── __init__.py
+│   │       ├── equal_weight.py
+│   │       ├── ic_weighted.py
+│   │       ├── optimization_based.py
+│   │       └── machine_learning.py
+│   │
+│   ├── machine_learning/        # ML para finanças
+│   │   ├── __init__.py
+│   │   │
+│   │   ├── features/
+│   │   │   ├── __init__.py
+│   │   │   ├── financial_features.py
+│   │   │   ├── technical_features.py
+│   │   │   ├── fundamental_features.py
+│   │   │   └── alternative_features.py
+│   │   │
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── regression/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── linear.py
+│   │   │   │   ├── ridge.py
+│   │   │   │   ├── lasso.py
+│   │   │   │   └── elastic_net.py
+│   │   │   ├── tree_based/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── random_forest.py
+│   │   │   │   ├── gradient_boosting.py
+│   │   │   │   └── xgboost.py
+│   │   │   ├── neural_networks/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── mlp.py
+│   │   │   │   ├── cnn.py
+│   │   │   │   ├── rnn.py
+│   │   │   │   └── transformers.py
+│   │   │   └── specialized/
+│   │   │       ├── __init__.py
+│   │   │       ├── autoencoders.py
+│   │   │       ├── reinforcement.py
+│   │   │       └── generative.py
+│   │   │
+│   │   ├── validation/
+│   │   │   ├── __init__.py
+│   │   │   ├── time_series_split.py
+│   │   │   ├── purged_kfold.py
+│   │   │   ├── combinatorial.py
+│   │   │   └── walk_forward.py
+│   │   │
+│   │   └── explainability/
+│   │       ├── __init__.py
+│   │       ├── shap.py
+│   │       ├── lime.py
+│   │       ├── partial_dependence.py
+│   │       └── feature_importance.py
+│   │
+│   └── visualization/           # Visualização
+│       ├── __init__.py
+│       │
+│       ├── plotting/
+│       │   ├── __init__.py
+│       │   ├── matplotlib/
+│       │   │   ├── __init__.py
+│       │   │   ├── financial_plots.py
+│       │   │   ├── risk_plots.py
+│       │   │   └── portfolio_plots.py
+│       │   ├── plotly/
+│       │   │   ├── __init__.py
+│       │   │   ├── interactive_plots.py
+│       │   │   ├── dashboards.py
+│       │   │   └── 3d_plots.py
+│       │   └── bokeh/
+│       │       ├── __init__.py
+│       │       └── interactive.py
+│       │
+│       ├── dashboards/
+│       │   ├── __init__.py
+│       │   ├── portfolio_dashboard.py
+│       │   ├── risk_dashboard.py
+│       │   └── trading_dashboard.py
+│       │
+│       └── reports/
+│           ├── __init__.py
+│           ├── pdf_generator.py
+│           ├── html_generator.py
+│           └── excel_generator.py
+│
+├── execution/                    # Execução de trades
+│   ├── __init__.py
+│   │
+│   ├── costs/                   # Custos de transação
+│   │   ├── __init__.py
+│   │   ├── commission.py       # Commissions
+│   │   ├── slippage.py        # Slippage models
+│   │   ├── market_impact.py   # Market impact
+│   │   └── timing_cost.py     # Timing cost
+│   │
+│   ├── algorithms/             # Algoritmos de execução
+│   │   ├── __init__.py
+│   │   ├── twap.py            # Time-weighted average price
+│   │   ├── vwap.py            # Volume-weighted average price
+│   │   ├── implementation_shortfall.py
+│   │   ├── pvol.py            # Percentage of volume
+│   │   └── adaptive.py        # Adaptive algorithms
+│   │
+│   └── optimization/          # Otimização de execução
+│       ├── __init__.py
+│       ├── schedule_optimization.py
+│       └── dynamic_optimization.py
+│
+├── utils/                       # Utilitários avançados
+│   ├── __init__.py
+│   │
+│   ├── parallel/               # Paralelização
+│   │   ├── __init__.py
+│   │   ├── multiprocessing.py
+│   │   ├── threading.py
+│   │   ├── dask_integration.py
+│   │   └── ray_integration.py
+│   │
+│   ├── caching/                # Caching avançado
+│   │   ├── __init__.py
+│   │   ├── memoization.py
+│   │   ├── disk_cache.py
+│   │   ├── redis_cache.py
+│   │   └── distributed_cache.py
+│   │
+│   ├── config/                 # Configuração
+│   │   ├── __init__.py
+│   │   ├── settings.py
+│   │   ├── environment.py
+│   │   └── feature_flags.py
+│   │
+│   └── monitoring/             # Monitoramento
+│       ├── __init__.py
+│       ├── metrics.py
+│       ├── logging.py
+│       └── alerting.py
+│
+└── extensions/                 # Extensões
+    ├── __init__.py
+    │
+    ├── web/                    # Extensões web
+    │   ├── __init__.py
+    │   ├── fastapi_app.py
+    │   ├── streamlit_app.py
+    │   └── dash_app.py
+    │
+    ├── database/              # Integração com bancos
+    │   ├── __init__.py
+    │   ├── sql.py
+    │   ├── nosql.py
+    │   └── timeseries.py
+    │
+    ├── external/              # Integração externa
+    │   ├── __init__.py
+    │   ├── bloomberg.py
+    │   ├── refinitiv.py
+    │   ├── interactive_brokers.py
+    │   └── alpaca.py
+    │
+    └── experimental/          # Features experimentais
+        ├── __init__.py
+        ├── quantum.py        # Quantum finance
+        ├── blockchain.py     # Blockchain/Crypto
+        └── alternative_data.py
+```
+
+## EXEMPLOS DE IMPLEMENTAÇÃO DETALHADA
+
+### 1. Core Math - Distribuições com propriedades financeiras
+
+```python
+# quantcore/core/math/statistics/distributions/student_t.py
+from typing import Tuple, Optional
+import numpy as np
+from scipy import special
+from ...base import ContinuousDistribution
+from ....utils.decorators import validate_input
+
+class StudentTDistribution(ContinuousDistribution):
+    """
+    Student's t-distribution com ajustes para finanças.
+    
+    Parameters
+    ----------
+    df : float
+        Degrees of freedom (ν > 0)
+    loc : float
+        Location parameter
+    scale : float
+        Scale parameter (σ > 0)
+    
+    Notes
+    -----
+    PDF: f(x) = Γ((ν+1)/2) / [√(νπ) Γ(ν/2)] * (1 + (x-μ)²/νσ²)^{-(ν+1)/2}
+    
+    Para finanças, ν tipicamente entre 3 e 10 para caudas mais pesadas.
+    """
+    
+    def __init__(self, df: float, loc: float = 0.0, scale: float = 1.0):
+        self.df = df
+        self.loc = loc
+        self.scale = scale
+        self._validate_params()
+        
+    def _validate_params(self):
+        if self.df <= 0:
+            raise ValueError("Degrees of freedom must be positive")
+        if self.scale <= 0:
+            raise ValueError("Scale must be positive")
+    
+    @validate_input
+    def pdf(self, x: np.ndarray) -> np.ndarray:
+        """Probability density function."""
+        z = (x - self.loc) / self.scale
+        numerator = special.gamma((self.df + 1) / 2)
+        denominator = (np.sqrt(self.df * np.pi) * special.gamma(self.df / 2) * 
+                      self.scale)
+        factor = numerator / denominator
+        return factor * (1 + z**2 / self.df) ** (-(self.df + 1) / 2)
+    
+    @validate_input
+    def cdf(self, x: np.ndarray) -> np.ndarray:
+        """Cumulative distribution function."""
+        z = (x - self.loc) / self.scale
+        return special.stdtr(self.df, z)
+    
+    def ppf(self, q: np.ndarray) -> np.ndarray:
+        """Percent point function (inverse CDF)."""
+        return self.loc + self.scale * special.stdtrit(self.df, q)
+    
+    def moment(self, n: int) -> float:
+        """n-th moment of the distribution."""
+        if n % 2 == 1:  # Odd moments are 0 for symmetric t-dist
+            return 0.0
+        if n >= self.df:
+            return np.inf
+        # Formula for even moments
+        k = n // 2
+        moment = 1.0
+        for i in range(k):
+            moment *= (self.df - 2 * (i + 1))
+        return (self.scale ** n) * moment
+    
+    @property
+    def skewness(self) -> float:
+        """Skewness (0 for symmetric t-distribution)."""
+        return 0.0
+    
+    @property
+    def kurtosis(self) -> float:
+        """Excess kurtosis."""
+        if self.df > 4:
+            return 6 / (self.df - 4)
+        elif self.df > 2:
+            return np.inf
+        else:
+            return np.nan
+    
+    def fit(self, data: np.ndarray, method: str = 'mle') -> 'StudentTDistribution':
+        """
+        Fit distribution to data.
+        
+        Parameters
+        ----------
+        data : np.ndarray
+            Sample data
+        method : {'mle', 'moment'}
+            Estimation method
+            
+        Returns
+        -------
+        StudentTDistribution
+            Fitted distribution
+        """
+        if method == 'mle':
+            # Implement MLE estimation
+            from scipy import optimize
+            
+            def neg_log_likelihood(params):
+                df, loc, scale = params
+                if df <= 0 or scale <= 0:
+                    return np.inf
+                dist = StudentTDistribution(df, loc, scale)
+                return -np.sum(np.log(dist.pdf(data) + 1e-10))
+            
+            # Initial guess
+            init_df = 5.0
+            init_loc = np.median(data)
+            init_scale = np.std(data, ddof=1)
+            
+            result = optimize.minimize(
+                neg_log_likelihood,
+                [init_df, init_loc, init_scale],
+                bounds=[(2.1, 100), (None, None), (1e-10, None)]
+            )
+            
+            df, loc, scale = result.x
+            return StudentTDistribution(df, loc, scale)
+        
+        elif method == 'moment':
+            # Method of moments estimation
+            mu = np.mean(data)
+            sigma2 = np.var(data, ddof=1)
+            excess_kurtosis = special.kurtosis(data, bias=False)
+            
+            if excess_kurtosis <= 0:
+                df = np.inf  # Normal distribution
+            else:
+                df = 6 / excess_kurtosis + 4
+            
+            scale = np.sqrt(sigma2 * (df - 2) / df)
+            return StudentTDistribution(df, mu, scale)
+        
+        else:
+            raise ValueError(f"Unknown method: {method}")
+    
+    def var(self, alpha: float = 0.05) -> float:
+        """Value at Risk for given confidence level."""
+        return self.ppf(alpha)
+    
+    def cvar(self, alpha: float = 0.05) -> float:
+        """Conditional Value at Risk (Expected Shortfall)."""
+        # Analytical formula for t-distribution
+        from scipy import special
+        
+        t_alpha = self.ppf(alpha)
+        c = (self.df + t_alpha**2) / (self.df - 1)
+        factor = special.gamma((self.df + 1) / 2) / (np.sqrt(np.pi * self.df) * 
+                                                    special.gamma(self.df / 2))
+        density = factor * (1 + t_alpha**2 / self.df) ** (-(self.df + 1) / 2)
+        
+        return self.loc - (self.scale * c * density / alpha)
+```
+
+### 2. Pricing Engine Factory Pattern
+
+```python
+# quantcore/pricing/engines/engine_factory.py
+from typing import Dict, Type, Optional, Any
+from enum import Enum
+import inspect
+from ...instruments.base import FinancialInstrument
+from .base.pricing_engine import PricingEngine
+from .analytic.black_scholes import BlackScholesEngine
+from .lattice.binomial.cox_ross_rubinstein import CRREngine
+from .monte_carlo.mc_pricer import MonteCarloEngine
+from .finite_difference.fd_pricer import FiniteDifferenceEngine
+from ....core.utils.exceptions import EngineNotFoundError
+
+class EngineType(Enum):
+    """Types of pricing engines available."""
+    ANALYTIC = "analytic"
+    BINOMIAL = "binomial"
+    MONTE_CARLO = "monte_carlo"
+    FINITE_DIFFERENCE = "finite_difference"
+    FOURIER = "fourier"
+    HYBRID = "hybrid"
+
+class PricingEngineFactory:
+    """
+    Factory for creating appropriate pricing engines.
+    
+    Implements Registry pattern for dynamic engine registration.
+    
+    Examples
+    --------
+    >>> factory = PricingEngineFactory()
+    >>> option = EuropeanOption(...)
+    >>> 
+    >>> # Get default engine for instrument
+    >>> engine = factory.create_engine(option)
+    >>> 
+    >>> # Get specific engine type
+    >>> mc_engine = factory.create_engine(
+    ...     instrument=option,
+    ...     engine_type=EngineType.MONTE_CARLO,
+    ...     params={"n_paths": 100000}
+    ... )
+    """
+    
+    # Registry of available engines
+    _engine_registry: Dict[str, Type[PricingEngine]] = {}
+    _default_engines: Dict[str, EngineType] = {}
+    
+    def __init__(self):
+        self._register_default_engines()
+    
+    @classmethod
+    def register_engine(cls, 
+                       instrument_class: Type[FinancialInstrument],
+                       engine_type: EngineType,
+                       engine_class: Type[PricingEngine]):
+        """
+        Register a new engine for an instrument class.
+        
+        Parameters
+        ----------
+        instrument_class : Type[FinancialInstrument]
+            Class of instrument the engine can price
+        engine_type : EngineType
+            Type of engine
+        engine_class : Type[PricingEngine]
+            Engine class to register
+        """
+        key = f"{instrument_class.__name__}_{engine_type.value}"
+        cls._engine_registry[key] = engine_class
+    
+    @classmethod
+    def set_default_engine(cls,
+                          instrument_class: Type[FinancialInstrument],
+                          engine_type: EngineType):
+        """
+        Set default engine for an instrument class.
+        
+        Parameters
+        ----------
+        instrument_class : Type[FinancialInstrument]
+            Instrument class
+        engine_type : EngineType
+            Default engine type
+        """
+        cls._default_engines[instrument_class.__name__] = engine_type
+    
+    def _register_default_engines(self):
+        """Register all default engines."""
+        from ...instruments.derivatives.options.european import EuropeanOption
+        from ...instruments.derivatives.options.american import AmericanOption
+        from ...instruments.derivatives.options.asian import AsianOption
+        from ...instruments.fixed_income.bonds.fixed_rate import FixedRateBond
+        
+        # European Option engines
+        self.register_engine(EuropeanOption, EngineType.ANALYTIC, BlackScholesEngine)
+        self.register_engine(EuropeanOption, EngineType.BINOMIAL, CRREngine)
+        self.register_engine(EuropeanOption, EngineType.MONTE_CARLO, MonteCarloEngine)
+        self.register_engine(EuropeanOption, EngineType.FINITE_DIFFERENCE, FiniteDifferenceEngine)
+        
+        # American Option engines
+        self.register_engine(AmericanOption, EngineType.BINOMIAL, CRREngine)
+        self.register_engine(AmericanOption, EngineType.FINITE_DIFFERENCE, FiniteDifferenceEngine)
+        
+        # Asian Option engines
+        self.register_engine(AsianOption, EngineType.MONTE_CARLO, MonteCarloEngine)
+        
+        # Fixed Rate Bond engines
+        from .analytic.vasicek_bond import VasicekBondEngine
+        self.register_engine(FixedRateBond, EngineType.ANALYTIC, VasicekBondEngine)
+        
+        # Set default engines
+        self.set_default_engine(EuropeanOption, EngineType.ANALYTIC)
+        self.set_default_engine(AmericanOption, EngineType.BINOMIAL)
+        self.set_default_engine(AsianOption, EngineType.MONTE_CARLO)
+        self.set_default_engine(FixedRateBond, EngineType.ANALYTIC)
+    
+    def create_engine(self,
+                     instrument: FinancialInstrument,
+                     engine_type: Optional[EngineType] = None,
+                     **engine_params) -> PricingEngine:
+        """
+        Create appropriate pricing engine for instrument.
+        
+        Parameters
+        ----------
+        instrument : FinancialInstrument
+            Instrument to price
+        engine_type : EngineType, optional
+            Specific engine type, if None uses default
+        **engine_params : dict
+            Parameters to pass to engine constructor
+            
+        Returns
+        -------
+        PricingEngine
+            Configured pricing engine
+            
+        Raises
+        ------
+        EngineNotFoundError
+            If no suitable engine found
+        """
+        # Determine engine type
+        if engine_type is None:
+            engine_type = self._get_default_engine_type(instrument)
+        
+        # Find engine class
+        instrument_class = type(instrument).__name__
+        key = f"{instrument_class}_{engine_type.value}"
+        
+        if key not in self._engine_registry:
+            raise EngineNotFoundError(
+                f"No engine found for {instrument_class} with type {engine_type}"
+            )
+        
+        engine_class = self._engine_registry[key]
+        
+        # Check if engine can handle the instrument
+        if not self._engine_supports_instrument(engine_class, instrument):
+            raise EngineNotFoundError(
+                f"Engine {engine_class.__name__} does not support {instrument_class}"
+            )
+        
+        # Create engine instance
+        return engine_class(**engine_params)
+    
+    def _get_default_engine_type(self, instrument: FinancialInstrument) -> EngineType:
+        """Get default engine type for instrument."""
+        instrument_class = type(instrument).__name__
+        
+        if instrument_class in self._default_engines:
+            return self._default_engines[instrument_class]
+        
+        # Fallback: try to find any registered engine
+        for engine_type in EngineType:
+            key = f"{instrument_class}_{engine_type.value}"
+            if key in self._engine_registry:
+                return engine_type
+        
+        raise EngineNotFoundError(f"No engine found for {instrument_class}")
+    
+    def _engine_supports_instrument(self, 
+                                   engine_class: Type[PricingEngine],
+                                   instrument: FinancialInstrument) -> bool:
+        """Check if engine can price the instrument."""
+        # Check engine's can_price method if it exists
+        if hasattr(engine_class, 'can_price'):
+            return engine_class.can_price(instrument)
+        
+        # Otherwise check constructor signature
+        sig = inspect.signature(engine_class.__init__)
+        params = list(sig.parameters.keys())
+        
+        # Engine should accept at least the instrument
+        return len(params) >= 2  # self + instrument
+    
+    def get_available_engines(self, 
+                             instrument: FinancialInstrument) -> Dict[EngineType, Type[PricingEngine]]:
+        """
+        Get all available engines for an instrument.
+        
+        Parameters
+        ----------
+        instrument : FinancialInstrument
+            Instrument to check
+            
+        Returns
+        -------
+        Dict[EngineType, Type[PricingEngine]]
+            Available engines
+        """
+        instrument_class = type(instrument).__name__
+        available = {}
+        
+        for engine_type in EngineType:
+            key = f"{instrument_class}_{engine_type.value}"
+            if key in self._engine_registry:
+                engine_class = self._engine_registry[key]
+                if self._engine_supports_instrument(engine_class, instrument):
+                    available[engine_type] = engine_class
+        
+        return available
+    
+    def benchmark_engines(self,
+                         instrument: FinancialInstrument,
+                         engines: Optional[list[EngineType]] = None,
+                         **benchmark_params) -> Dict[str, Any]:
+        """
+        Benchmark different engines for an instrument.
+        
+        Parameters
+        ----------
+        instrument : FinancialInstrument
+            Instrument to benchmark
+        engines : list[EngineType], optional
+            Engines to benchmark, if None uses all available
+        **benchmark_params : dict
+            Benchmark parameters
+            
+        Returns
+        -------
+        Dict[str, Any]
+            Benchmark results
+        """
+        import time
+        from ....utils.performance import Timer
+        
+        if engines is None:
+            engines_dict = self.get_available_engines(instrument)
+            engines = list(engines_dict.keys())
+        
+        results = {}
+        
+        for engine_type in engines:
+            try:
+                # Create engine
+                engine = self.create_engine(instrument, engine_type, **benchmark_params)
+                
+                # Time the pricing
+                timer = Timer()
+                with timer:
+                    price = engine.calculate(instrument)
+                
+                # Get additional metrics
+                results[engine_type.value] = {
+                    'price': price,
+                    'time_seconds': timer.elapsed,
+                    'engine_class': type(engine).__name__,
+                    'success': True
+                }
+                
+            except Exception as e:
+                results[engine_type.value] = {
+                    'price': None,
+                    'time_seconds': None,
+                    'error': str(e),
+                    'success': False
+                }
+        
+        return results
+```
+
+### 3. Sistema de Calibração com múltiplos métodos
+
+```python
+# quantcore/pricing/calibration/calibration_system.py
+from typing import Dict, List, Tuple, Optional, Callable, Any
+import numpy as np
+from dataclasses import dataclass
+from enum import Enum
+from scipy import optimize
+from ...models.base import StochasticModel
+from ....market.data.models import MarketData
+from ....core.math.optimization import OptimizationResult
+from .optimizers import OptimizerType, create_optimizer
+from .objectives import ObjectiveFunction, create_objective
+from .constraints import ConstraintSet, create_constraints
+
+class CalibrationMethod(Enum):
+    """Calibration methods available."""
+    LEAST_SQUARES = "least_squares"
+    MAXIMUM_LIKELIHOOD = "maximum_likelihood"
+    BAYESIAN = "bayesian"
+    MACHINE_LEARNING = "machine_learning"
+
+@dataclass
+class CalibrationResult:
+    """Results of model calibration."""
+    success: bool
+    parameters: Dict[str, float]
+    initial_guess: Dict[str, float]
+    objective_value: float
+    iterations: int
+    convergence_message: str
+    calibration_time: float
+    residuals: Optional[np.ndarray] = None
+    jacobian: Optional[np.ndarray] = None
+    hessian: Optional[np.ndarray] = None
+    confidence_intervals: Optional[Dict[str, Tuple[float, float]]] = None
+    market_data: Optional[MarketData] = None
+    model_prices: Optional[np.ndarray] = None
+    market_prices: Optional[np.ndarray] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            'success': self.success,
+            'parameters': self.parameters,
+            'objective_value': self.objective_value,
+            'iterations': self.iterations,
+            'calibration_time': self.calibration_time,
+            'confidence_intervals': self.confidence_intervals
+        }
+    
+    def calculate_errors(self) -> Dict[str, float]:
+        """Calculate various error metrics."""
+        if self.model_prices is None or self.market_prices is None:
+            return {}
+        
+        errors = self.model_prices - self.market_prices
+        abs_errors = np.abs(errors)
+        rel_errors = abs_errors / np.abs(self.market_prices)
+        
+        return {
+            'mean_absolute_error': np.mean(abs_errors),
+            'root_mean_squared_error': np.sqrt(np.mean(errors**2)),
+            'max_absolute_error': np.max(abs_errors),
+            'mean_relative_error': np.mean(rel_errors),
+            'r_squared': 1 - np.sum(errors**2) / np.sum((self.market_prices - np.mean(self.market_prices))**2)
+        }
+
+class ModelCalibrator:
+    """
+    Sistema de calibração unificado para modelos estocásticos.
+    
+    Suporta múltiplos métodos de otimização, funções objetivo e restrições.
+    
+    Examples
+    --------
+    >>> calibrator = ModelCalibrator()
+    >>> model = HestonModel()
+    >>> market_data = load_volatility_surface()
+    >>> 
+    >>> # Calibração básica
+    >>> result = calibrator.calibrate(
+    ...     model=model,
+    ...     market_data=market_data,
+    ...     method=CalibrationMethod.LEAST_SQUARES
+    ... )
+    >>> 
+    >>> # Calibração com restrições
+    >>> result = calibrator.calibrate(
+    ...     model=model,
+    ...     market_data=market_data,
+    ...     constraints={'v0': (0.01, 0.5), 'theta': (0.01, 1.0)}
+    ... )
+    """
+    
+    def __init__(self):
+        self._optimizers = self._initialize_optimizers()
+        self._objectives = self._initialize_objectives()
+        self._constraints = self._initialize_constraints()
+    
+    def _initialize_optimizers(self) -> Dict[OptimizerType, Callable]:
+        """Initialize available optimizers."""
+        return {
+            OptimizerType.LEVENBERG_MARQUARDT: optimize.least_squares,
+            OptimizerType.NELDER_MEAD: optimize.minimize,
+            OptimizerType.BFGS: optimize.minimize,
+            OptimizerType.L_BFGS_B: optimize.minimize,
+            OptimizerType.DIFFERENTIAL_EVOLUTION: optimize.differential_evolution,
+            OptimizerType.SIMULATED_ANNEALING: optimize.dual_annealing,
+            OptimizerType.PARTICLE_SWARM: self._particle_swarm_optimizer
+        }
+    
+    def _initialize_objectives(self) -> Dict[str, Callable]:
+        """Initialize objective functions."""
+        return {
+            'mse': lambda model, market: np.mean((model - market) ** 2),
+            'rmse': lambda model, market: np.sqrt(np.mean((model - market) ** 2)),
+            'mae': lambda model, market: np.mean(np.abs(model - market)),
+            'huber': self._huber_loss,
+            'custom': None  # For user-defined objectives
+        }
+    
+    def _initialize_constraints(self) -> Dict[str, Callable]:
+        """Initialize constraint handlers."""
+        return {
+            'bounds': self._handle_bounds,
+            'inequality': self._handle_inequality,
+            'equality': self._handle_equality,
+            'penalty': self._handle_penalty_method
+        }
+    
+    def calibrate(self,
+                  model: StochasticModel,
+                  market_data: MarketData,
+                  method: CalibrationMethod = CalibrationMethod.LEAST_SQUARES,
+                  optimizer: OptimizerType = OptimizerType.LEVENBERG_MARQUARDT,
+                  objective: str = 'mse',
+                  constraints: Optional[Dict] = None,
+                  initial_guess: Optional[Dict[str, float]] = None,
+                  **kwargs) -> CalibrationResult:
+        """
+        Calibrate model to market data.
+        
+        Parameters
+        ----------
+        model : StochasticModel
+            Model to calibrate
+        market_data : MarketData
+            Market data to calibrate to
+        method : CalibrationMethod
+            Calibration method
+        optimizer : OptimizerType
+            Optimization algorithm
+        objective : str
+            Objective function type
+        constraints : dict, optional
+            Constraints on parameters
+        initial_guess : dict, optional
+            Initial parameter guess
+        **kwargs : dict
+            Additional optimization parameters
+            
+        Returns
+        -------
+        CalibrationResult
+            Calibration results
+        """
+        import time
+        
+        start_time = time.time()
+        
+        # Prepare calibration
+        calibration_setup = self._prepare_calibration(
+            model, market_data, method, objective, constraints, initial_guess
+        )
+        
+        # Run optimization
+        optimization_result = self._run_optimization(
+            calibration_setup, optimizer, **kwargs
+        )
+        
+        # Process results
+        result = self._process_results(
+            optimization_result, model, market_data, start_time
+        )
+        
+        return result
+    
+    def _prepare_calibration(self,
+                            model: StochasticModel,
+                            market_data: MarketData,
+                            method: CalibrationMethod,
+                            objective: str,
+                            constraints: Optional[Dict],
+                            initial_guess: Optional[Dict]) -> Dict[str, Any]:
+        """Prepare everything for calibration."""
+        # Get model parameters
+        param_names = model.parameter_names
+        param_bounds = model.parameter_bounds
+        
+        # Set initial guess
+        if initial_guess is None:
+            initial_guess = model.default_parameters
+        else:
+            # Validate and complete initial guess
+            initial_guess = self._validate_initial_guess(initial_guess, param_names, model)
+        
+        # Prepare constraints
+        constraint_setup = self._prepare_constraints(constraints, param_bounds)
+        
+        # Prepare objective function
+        objective_func = self._prepare_objective(
+            model, market_data, method, objective
+        )
+        
+        return {
+            'param_names': param_names,
+            'initial_guess': initial_guess,
+            'constraints': constraint_setup,
+            'objective_func': objective_func,
+            'model': model,
+            'market_data': market_data
+        }
+    
+    def _run_optimization(self,
+                         setup: Dict[str, Any],
+                         optimizer_type: OptimizerType,
+                         **kwargs) -> OptimizationResult:
+        """Run the optimization."""
+        # Extract setup
+        param_names = setup['param_names']
+        x0 = np.array([setup['initial_guess'][name] for name in param_names])
+        objective_func = setup['objective_func']
+        constraints = setup['constraints']
+        
+        # Get optimizer
+        optimizer = self._optimizers[optimizer_type]
+        
+        # Prepare optimizer arguments
+        opt_args = self._prepare_optimizer_args(
+            optimizer_type, objective_func, x0, constraints, **kwargs
+        )
+        
+        # Run optimization
+        if optimizer_type == OptimizerType.LEVENBERG_MARQUARDT:
+            # least_squares has different signature
+            result = optimizer(objective_func, x0, **opt_args)
+            # Convert to standard format
+            opt_result = self._convert_least_squares_result(result)
+        else:
+            result = optimizer(**opt_args)
+            opt_result = self._convert_minimize_result(result)
+        
+        return opt_result
+    
+    def _process_results(self,
+                        opt_result: OptimizationResult,
+                        model: StochasticModel,
+                        market_data: MarketData,
+                        start_time: float) -> CalibrationResult:
+        """Process optimization results into CalibrationResult."""
+        import time
+        
+        # Update model with calibrated parameters
+        calibrated_params = dict(zip(model.parameter_names, opt_result.x))
+        model.update_parameters(calibrated_params)
+        
+        # Calculate model prices with calibrated parameters
+        model_prices = model.calculate(market_data)
+        market_prices = market_data.prices
+        
+        # Calculate residuals
+        residuals = model_prices - market_prices
+        
+        # Calculate confidence intervals if possible
+        confidence_intervals = None
+        if opt_result.jac is not None:
+            confidence_intervals = self._calculate_confidence_intervals(
+                opt_result, model.parameter_names
+            )
+        
+        return CalibrationResult(
+            success=opt_result.success,
+            parameters=calibrated_params,
+            initial_guess=model.default_parameters,
+            objective_value=opt_result.fun,
+            iterations=opt_result.nit,
+            convergence_message=opt_result.message,
+            calibration_time=time.time() - start_time,
+            residuals=residuals,
+            jacobian=opt_result.jac,
+            hessian=opt_result.hess,
+            confidence_intervals=confidence_intervals,
+            market_data=market_data,
+            model_prices=model_prices,
+            market_prices=market_prices
+        )
+    
+    def calibrate_with_uncertainty(self,
+                                  model: StochasticModel,
+                                  market_data: MarketData,
+                                  n_bootstraps: int = 100,
+                                  **kwargs) -> Dict[str, Any]:
+        """
+        Calibrate with uncertainty quantification using bootstrapping.
+        
+        Parameters
+        ----------
+        model : StochasticModel
+            Model to calibrate
+        market_data : MarketData
+            Market data
+        n_bootstraps : int
+            Number of bootstrap samples
+        **kwargs : dict
+            Calibration parameters
+            
+        Returns
+        -------
+        Dict[str, Any]
+            Calibration results with uncertainty
+        """
+        import concurrent.futures
+        
+        # Original calibration
+        original_result = self.calibrate(model, market_data, **kwargs)
+        
+        # Bootstrap samples
+        bootstrap_results = []
+        n_data_points = len(market_data)
+        
+        def bootstrap_calibration(seed):
+            np.random.seed(seed)
+            # Resample with replacement
+            indices = np.random.choice(n_data_points, size=n_data_points, replace=True)
+            bootstrap_data = market_data.resample(indices)
+            
+            # Calibrate on bootstrap sample
+            result = self.calibrate(
+                model.copy(),
+                bootstrap_data,
+                **kwargs
+            )
+            return result.parameters
+        
+        # Parallel bootstrap
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            seeds = range(n_bootstraps)
+            bootstrap_params = list(executor.map(bootstrap_calibration, seeds))
+        
+        # Calculate statistics
+        param_stats = {}
+        for param_name in model.parameter_names:
+            param_values = [params[param_name] for params in bootstrap_params]
+            param_stats[param_name] = {
+                'mean': np.mean(param_values),
+                'std': np.std(param_values),
+                '2.5%': np.percentile(param_values, 2.5),
+                '97.5%': np.percentile(param_values, 97.5),
+                'bootstrap_values': param_values
+            }
+        
+        return {
+            'original_calibration': original_result,
+            'bootstrap_statistics': param_stats,
+            'n_bootstraps': n_bootstraps
+        }
+    
+    def calibrate_multiple_models(self,
+                                 models: List[StochasticModel],
+                                 market_data: MarketData,
+                                 **kwargs) -> Dict[str, CalibrationResult]:
+        """
+        Calibrate multiple models and compare results.
+        
+        Parameters
+        ----------
+        models : List[StochasticModel]
+            Models to calibrate
+        market_data : MarketData
+            Market data
+        **kwargs : dict
+            Calibration parameters
+            
+        Returns
+        -------
+        Dict[str, CalibrationResult]
+            Calibration results for each model
+        """
+        results = {}
+        
+        for model in models:
+            model_name = model.__class__.__name__
+            try:
+                result = self.calibrate(model, market_data, **kwargs)
+                results[model_name] = result
+            except Exception as e:
+                results[model_name] = CalibrationResult(
+                    success=False,
+                    parameters={},
+                    initial_guess=model.default_parameters,
+                    objective_value=np.inf,
+                    iterations=0,
+                    convergence_message=str(e),
+                    calibration_time=0.0
+                )
+        
+        return results
+    
+    def _calculate_confidence_intervals(self,
+                                       result: OptimizationResult,
+                                       param_names: List[str]) -> Dict[str, Tuple[float, float]]:
+        """Calculate confidence intervals from Jacobian."""
+        # Using asymptotic normality
+        alpha = 0.05  # 95% confidence
+        n = len(result.residuals) if result.residuals is not None else 1
+        p = len(param_names)
+        
+        # Residual variance
+        if result.residuals is not None:
+            sigma2 = np.sum(result.residuals**2) / (n - p)
+        else:
+            sigma2 = result.fun / (n - p)
+        
+        # Covariance matrix
+        if result.jac is not None:
+            try:
+                cov_matrix = sigma2 * np.linalg.inv(result.jac.T @ result.jac)
+                std_errors = np.sqrt(np.diag(cov_matrix))
+            except np.linalg.LinAlgError:
+                return None
+        else:
+            return None
+        
+        # Confidence intervals
+        from scipy import stats
+        t_value = stats.t.ppf(1 - alpha/2, n - p)
+        
+        intervals = {}
+        for i, name in enumerate(param_names):
+            estimate = result.x[i]
+            se = std_errors[i]
+            lower = estimate - t_value * se
+            upper = estimate + t_value * se
+            intervals[name] = (lower, upper)
+        
+        return intervals
+```
+
+## IMPLEMENTAÇÃO DE BOAS PRÁTICAS
+
+### 1. Configuração via Hydra
+
+```yaml
+# config/quantcore/default.yaml
+defaults:
+  - base
+  - _self_
+
+quantcore:
+  version: 1.0.0
+  
+  core:
+    math:
+      precision: double
+      default_epsilon: 1e-10
+      use_numba: true
+      parallel_threshold: 1000
+    
+    time:
+      default_calendar: Brazil
+      default_daycount: bus252
+      date_format: "%Y-%m-%d"
+    
+    utils:
+      validation:
+        strict: true
+        raise_on_error: true
+      caching:
+        enabled: true
+        type: lru
+        maxsize: 1024
+  
+  market:
+    data:
+      default_source: yahoo
+      cache_ttl: 3600
+      retry_attempts: 3
+      timeout: 30
+    
+    curves:
+      interpolation: cubic_spline
+      extrapolation: flat
+      bootstrap_method: iterative
+  
+  pricing:
+    default_engine: auto
+    engines:
+      analytic:
+        precision: high
+      
+      monte_carlo:
+        default_paths: 10000
+        default_steps: 252
+        random_seed: 42
+        variance_reduction:
+          antithetic: true
+          control_variates: true
+          importance_sampling: false
+      
+      finite_difference:
+        grid_points: 100
+        time_steps: 1000
+        scheme: crank_nicolson
+      
+      lattice:
+        steps: 100
+        method: cox_ross_rubinstein
+    
+    calibration:
+      default_method: least_squares
+      default_optimizer: levenberg_marquardt
+      max_iterations: 1000
+      tolerance: 1e-8
+  
+  risk:
+    var:
+      confidence_level: 0.95
+      horizon_days: 1
+      method: historical
+    
+    greeks:
+      bump_size: 0.01
+      method: analytic
+  
+  portfolio:
+    optimization:
+      solver: quadratic
+      max_iterations: 1000
+      tolerance: 1e-6
+  
+  performance:
+    use_multiprocessing: true
+    max_workers: 4
+    chunk_size: 1000
+    memory_limit_gb: 4
+  
+  logging:
+    level: INFO
+    format: json
+    handlers:
+      console:
+        enabled: true
+      file:
+        enabled: true
+        path: logs/quantcore.log
+        max_size_mb: 100
+        backup_count: 5
+  
+  monitoring:
+    metrics:
+      enabled: true
+      port: 9090
+    tracing:
+      enabled: false
+```
+
+### 2. Sistema de Testes Hierárquico
+
+```python
+# tests/conftest.py
+import pytest
+import numpy as np
+from quantcore import quantcoreConfig
+
+@pytest.fixture(scope="session")
+def config():
+    """Global configuration for tests."""
+    return quantcoreConfig(
+        math_precision="double",
+        use_numba=False,  # Disable for faster tests
+        strict_validation=True
+    )
+
+@pytest.fixture
+def rng():
+    """Random number generator with fixed seed for reproducibility."""
+    return np.random.RandomState(42)
+
+@pytest.fixture
+def sample_equity_data(rng):
+    """Sample equity price data."""
+    n = 252  # One year of daily data
+    returns = rng.normal(0.0005, 0.02, n)
+    prices = 100 * np.exp(np.cumsum(returns))
+    dates = pd.date_range('2023-01-01', periods=n, freq='B')
+    return pd.Series(prices, index=dates, name='price')
+
+@pytest.fixture
+def sample_option_params():
+    """Sample option parameters for testing."""
+    return {
+        'underlying_price': 100.0,
+        'strike_price': 105.0,
+        'time_to_maturity': 0.5,
+        'risk_free_rate': 0.03,
+        'volatility': 0.25,
+        'dividend_yield': 0.0
+    }
+
+@pytest.fixture
+def sample_yield_curve():
+    """Sample yield curve for testing."""
+    from quantcore.market.curves.yield.yield_curve import YieldCurve
+    
+    times = np.array([0.25, 0.5, 1.0, 2.0, 5.0, 10.0])
+    rates = np.array([0.015, 0.016, 0.018, 0.020, 0.025, 0.030])
+    
+    return YieldCurve.from_points(times, rates)
+
+# Property-based testing fixtures
+@pytest.fixture
+def arb_free_option_params(rng):
+    """Generate arbitrage-free option parameters."""
+    S = rng.uniform(50, 150)
+    K = rng.uniform(50, 150)
+    T = rng.uniform(0.1, 2.0)
+    r = rng.uniform(0.0, 0.05)
+    sigma = rng.uniform(0.1, 0.5)
+    
+    return {
+        'underlying_price': S,
+        'strike_price': K,
+        'time_to_maturity': T,
+        'risk_free_rate': r,
+        'volatility': sigma
+    }
+```
+
+### 3. Exemplo de Uso Completo
+
+```python
+# examples/comprehensive_usage.py
+"""
+Exemplo completo de uso da biblioteca quantcore.
+"""
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from typing import Dict, List
+
+# Importações principais
+from quantcore import quantcore
+from quantcore.core.time import Date, Calendar
+from quantcore.instruments.derivatives.options import EuropeanOption, OptionType
+from quantcore.pricing.engines import PricingEngineFactory, EngineType
+from quantcore.market.data import YahooFinanceSource
+from quantcore.market.curves.yield import YieldCurveBuilder
+from quantcore.risk.metrics import ValueAtRisk
+from quantcore.portfolio.construction import MeanVarianceOptimizer
+
+def example_1_option_pricing():
+    """Exemplo 1: Precificação de opções com múltiplos métodos."""
+    print("=== Exemplo 1: Precificação de Opções ===")
+    
+    # Criar opção europeia
+    option = EuropeanOption(
+        underlying_price=100.0,
+        strike_price=105.0,
+        time_to_maturity=0.5,  # 6 meses
+        risk_free_rate=0.03,
+        volatility=0.25,
+        dividend_yield=0.01,
+        option_type=OptionType.CALL
+    )
+    
+    # Usar factory para criar engines
+    factory = PricingEngineFactory()
+    
+    # 1. Precificação analítica (Black-Scholes)
+    analytic_engine = factory.create_engine(option, EngineType.ANALYTIC)
+    analytic_price = analytic_engine.calculate(option)
+    print(f"Preço Analítico: {analytic_price:.4f}")
+    
+    # 2. Precificação por Monte Carlo
+    mc_engine = factory.create_engine(
+        option,
+        EngineType.MONTE_CARLO,
+        n_paths=100000,
+        n_steps=252
+    )
+    mc_price = mc_engine.calculate(option)
+    print(f"Preço Monte Carlo: {mc_price:.4f}")
+    
+    # 3. Precificação por árvore binomial
+    binomial_engine = factory.create_engine(
+        option,
+        EngineType.BINOMIAL,
+        steps=100
+    )
+    binomial_price = binomial_engine.calculate(option)
+    print(f"Preço Binomial: {binomial_price:.4f}")
+    
+    # 4. Benchmark de todos os métodos
+    benchmark_results = factory.benchmark_engines(
+        option,
+        params={'n_paths': 50000, 'steps': 100}
+    )
+    
+    print("\nBenchmark dos Engines:")
+    for method, results in benchmark_results.items():
+        if results['success']:
+            print(f"  {method}: {results['price']:.4f} ({results['time_seconds']:.3f}s)")
+    
+    return option, benchmark_results
+
+def example_2_yield_curve_construction():
+    """Exemplo 2: Construção de curva de juros."""
+    print("\n=== Exemplo 2: Curva de Juros ===")
+    
+    # Dados de mercado
+    market_instruments = [
+        ('deposit', 0.25, 0.015),   # 3 meses
+        ('deposit', 0.5, 0.016),    # 6 meses
+        ('swap', 1.0, 0.018),       # 1 ano
+        ('swap', 2.0, 0.020),       # 2 anos
+        ('swap', 5.0, 0.025),       # 5 anos
+        ('swap', 10.0, 0.030),      # 10 anos
+    ]
+    
+    # Bootstrapping da curva
+    builder = YieldCurveBuilder()
+    curve = builder.bootstrap(market_instruments)
+    
+    # Interpolação em vários pontos
+    times = np.linspace(0, 10, 50)
+    zero_rates = [curve.zero_rate(t) for t in times]
+    forward_rates = [curve.forward_rate(t, t+0.25) for t in times[:-1]]
+    
+    # Plot
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+    
+    ax1.plot(times, zero_rates, 'b-', linewidth=2)
+    ax1.set_xlabel('Tempo (anos)')
+    ax1.set_ylabel('Taxa Zero (%)')
+    ax1.set_title('Curva Zero')
+    ax1.grid(True)
+    
+    ax2.plot(times[:-1], forward_rates, 'r-', linewidth=2)
+    ax2.set_xlabel('Tempo (anos)')
+    ax2.set_ylabel('Taxa Forward 3M (%)')
+    ax2.set_title('Curva Forward')
+    ax2.grid(True)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    print(f"Taxa zero 1 ano: {curve.zero_rate(1.0):.3%}")
+    print(f"Taxa forward 1y1y: {curve.forward_rate(1.0, 2.0):.3%}")
+    
+    return curve
+
+def example_3_risk_metrics():
+    """Exemplo 3: Métricas de risco."""
+    print("\n=== Exemplo 3: Métricas de Risco ===")
+    
+    # Gerar retornos simulados
+    np.random.seed(42)
+    n_days = 1000
+    returns = np.random.StudentT(df=5, loc=0.0005, scale=0.02, size=n_days)
+    
+    # Calcular VaR histórico
+    var_calculator = ValueAtRisk(confidence_level=0.95, horizon=1)
+    historical_var = var_calculator.historical(returns)
+    
+    # Calcular VaR paramétrico (distribuição t)
+    from quantcore.core.math.statistics.distributions import StudentTDistribution
+    
+    # Ajustar distribuição t aos dados
+    t_dist = StudentTDistribution.fit(returns)
+    parametric_var = t_dist.var(alpha=0.05)
+    
+    # Calcular Expected Shortfall
+    es = t_dist.cvar(alpha=0.05)
+    
+    print(f"Retorno médio: {np.mean(returns):.4%}")
+    print(f"Volatilidade: {np.std(returns):.4%}")
+    print(f"VaR Histórico 95%: {historical_var:.4%}")
+    print(f"VaR Paramétrico 95%: {parametric_var:.4%}")
+    print(f"Expected Shortfall 95%: {es:.4%}")
+    print(f"Skewness: {t_dist.skewness:.4f}")
+    print(f"Excess Kurtosis: {t_dist.kurtosis:.4f}")
+    
+    # Plot distribuição
+    x = np.linspace(-0.1, 0.1, 1000)
+    pdf = t_dist.pdf(x)
+    
+    plt.figure(figsize=(10, 6))
+    plt.hist(returns, bins=50, density=True, alpha=0.5, label='Histograma')
+    plt.plot(x, pdf, 'r-', linewidth=2, label=f't-dist (ν={t_dist.df:.1f})')
+    plt.axvline(parametric_var, color='k', linestyle='--', label=f'VaR 95%')
+    plt.axvline(es, color='g', linestyle='--', label=f'ES 95%')
+    plt.xlabel('Retorno')
+    plt.ylabel('Densidade')
+    plt.title('Distribuição de Retornos e Medidas de Risco')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
+    return returns, historical_var, parametric_var, es
+
+def example_4_portfolio_optimization():
+    """Exemplo 4: Otimização de portfólio."""
+    print("\n=== Exemplo 4: Otimização de Portfólio ===")
+    
+    # Dados históricos de 4 ativos
+    np.random.seed(42)
+    n_assets = 4
+    n_periods = 1000
+    
+    # Gerar retornos correlacionados
+    means = np.array([0.0005, 0.0006, 0.0004, 0.0007])
+    volatilities = np.array([0.02, 0.025, 0.018, 0.03])
+    
+    # Matriz de correlação
+    corr_matrix = np.array([
+        [1.00, 0.60, 0.40, 0.30],
+        [0.60, 1.00, 0.50, 0.40],
+        [0.40, 0.50, 1.00, 0.20],
+        [0.30, 0.40, 0.20, 1.00]
+    ])
+    
+    # Matriz de covariância
+    cov_matrix = np.outer(volatilities, volatilities) * corr_matrix
+    
+    # Gerar retornos multivariados normais
+    returns = np.random.multivariate_normal(means, cov_matrix, n_periods)
+    
+    # Otimização Mean-Variance
+    optimizer = MeanVarianceOptimizer()
+    
+    # 1. Fronteira eficiente
+    target_returns = np.linspace(0.0003, 0.0010, 20)
+    efficient_portfolios = []
+    
+    for target_return in target_returns:
+        try:
+            weights = optimizer.optimize(
+                expected_returns=means,
+                covariance_matrix=cov_matrix,
+                target_return=target_return
+            )
+            portfolio_return = weights @ means
+            portfolio_vol = np.sqrt(weights @ cov_matrix @ weights)
+            efficient_portfolios.append((portfolio_return, portfolio_vol, weights))
+        except:
+            continue
+    
+    # 2. Portfólio de mínima variância
+    min_var_weights = optimizer.minimum_variance(
+        expected_returns=means,
+        covariance_matrix=cov_matrix
+    )
+    min_var_return = min_var_weights @ means
+    min_var_vol = np.sqrt(min_var_weights @ cov_matrix @ min_var_weights)
+    
+    # 3. Portfólio de máximo Sharpe
+    max_sharpe_weights = optimizer.maximum_sharpe(
+        expected_returns=means,
+        covariance_matrix=cov_matrix,
+        risk_free_rate=0.03/252  # Taxa diária
+    )
+    max_sharpe_return = max_sharpe_weights @ means
+    max_sharpe_vol = np.sqrt(max_sharpe_weights @ cov_matrix @ max_sharpe_weights)
+    
+    # Plot fronteira eficiente
+    returns_array = np.array([p[0] for p in efficient_portfolios])
+    vols_array = np.array([p[1] for p in efficient_portfolios])
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(vols_array, returns_array, 'b-', linewidth=2, label='Fronteira Eficiente')
+    plt.scatter(min_var_vol, min_var_return, color='red', s=100, 
+                label='Mínima Variância', zorder=5)
+    plt.scatter(max_sharpe_vol, max_sharpe_return, color='green', s=100,
+                label='Máximo Sharpe', zorder=5)
+    
+    # Ativos individuais
+    for i in range(n_assets):
+        plt.scatter(volatilities[i], means[i], color='black', s=50)
+        plt.annotate(f'Ativo {i+1}', (volatilities[i], means[i]),
+                    xytext=(5, 5), textcoords='offset points')
+    
+    plt.xlabel('Volatilidade (diária)')
+    plt.ylabel('Retorno Esperado (diário)')
+    plt.title('Fronteira Eficiente de Markowitz')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
+    print(f"Portfólio Mínima Variância:")
+    print(f"  Retorno: {min_var_return*252:.2%} anual")
+    print(f"  Volatilidade: {min_var_vol*np.sqrt(252):.2%} anual")
+    print(f"  Pesos: {min_var_weights}")
+    
+    print(f"\nPortfólio Máximo Sharpe:")
+    print(f"  Retorno: {max_sharpe_return*252:.2%} anual")
+    print(f"  Volatilidade: {max_sharpe_vol*np.sqrt(252):.2%} anual")
+    print(f"  Sharpe: {(max_sharpe_return - 0.03/252)/(max_sharpe_vol):.4f} diário")
+    print(f"  Pesos: {max_sharpe_weights}")
+    
+    return efficient_portfolios, min_var_weights, max_sharpe_weights
+
+def example_5_advanced_pricing():
+    """Exemplo 5: Precificação avançada com modelos estocásticos."""
+    print("\n=== Exemplo 5: Modelos Estocásticos Avançados ===")
+    
+    from quantcore.pricing.models.equity import HestonModel
+    from quantcore.pricing.calibration import ModelCalibrator
+    
+    # Criar modelo Heston
+    heston = HestonModel(
+        v0=0.04,      # Variance inicial
+        theta=0.04,   # Long-term variance
+        kappa=2.0,    # Mean reversion speed
+        sigma=0.3,    # Vol of vol
+        rho=-0.7      # Correlation
+    )
+    
+    # Dados de mercado (superfície de volatilidade)
+    # Em um caso real, isso viria de dados de mercado
+    strikes = np.linspace(80, 120, 9)
+    maturities = np.array([0.25, 0.5, 1.0, 2.0])
+    
+    # Gerar superfície de volatilidade sintética
+    market_vols = np.zeros((len(maturities), len(strikes)))
+    for i, T in enumerate(maturities):
+        for j, K in enumerate(strikes):
+            # Volatilidade sintética com smile
+            atm_vol = 0.25
+            smile = 0.05 * (K/100 - 1)**2
+            term_structure = 0.02 * np.sqrt(T)
+            market_vols[i, j] = atm_vol + smile + term_structure
+    
+    # Calibrar modelo Heston
+    calibrator = ModelCalibrator()
+    
+    calibration_result = calibrator.calibrate(
+        model=heston,
+        market_data=market_vols,
+        strikes=strikes,
+        maturities=maturities,
+        underlying_price=100.0,
+        risk_free_rate=0.03
+    )
+    
+    if calibration_result.success:
+        print("Calibração bem-sucedida!")
+        print(f"Parâmetros calibrados: {calibration_result.parameters}")
+        print(f"Erro RMSE: {calibration_result.calculate_errors()['root_mean_squared_error']:.6f}")
+        
+        # Plot superfície ajustada vs mercado
+        fig = plt.figure(figsize=(12, 5))
+        
+        # Superfície de mercado
+        ax1 = fig.add_subplot(121, projection='3d')
+        X, Y = np.meshgrid(strikes, maturities)
+        ax1.plot_surface(X, Y, market_vols, cmap='viridis', alpha=0.8)
+        ax1.set_title('Superfície de Mercado')
+        ax1.set_xlabel('Strike')
+        ax1.set_ylabel('Maturity')
+        ax1.set_zlabel('Volatilidade')
+        
+        # Superfície do modelo
+        ax2 = fig.add_subplot(122, projection='3d')
+        model_vols = calibration_result.model_prices.reshape(len(maturities), len(strikes))
+        ax2.plot_surface(X, Y, model_vols, cmap='plasma', alpha=0.8)
+        ax2.set_title('Superfície do Modelo Heston')
+        ax2.set_xlabel('Strike')
+        ax2.set_ylabel('Maturity')
+        ax2.set_zlabel('Volatilidade')
+        
+        plt.tight_layout()
+        plt.show()
+    
+    return heston, calibration_result
+
+def main():
+    """Função principal executando todos os exemplos."""
+    print("quantcore - Biblioteca Quantitativa em Python")
+    print("=" * 50)
+    
+    # Executar exemplos
+    results = {}
+    
+    results['option_pricing'] = example_1_option_pricing()
+    results['yield_curve'] = example_2_yield_curve_construction()
+    results['risk_metrics'] = example_3_risk_metrics()
+    results['portfolio_opt'] = example_4_portfolio_optimization()
+    results['advanced_pricing'] = example_5_advanced_pricing()
+    
+    print("\n" + "=" * 50)
+    print("Todos os exemplos executados com sucesso!")
+    
+    return results
+
+if __name__ == "__main__":
+    results = main()
+```

@@ -28,6 +28,10 @@ dev = [
     "mypy>=1.0.0"
 ]
 
+[tool.setuptools.packages.find]
+include = ["quantcore*"]
+exclude = ["config*"]
+
 [tool.setuptools.dynamic]
 version = {attr = "quantcore._version.__version__"}
 
