@@ -1,11 +1,14 @@
+from typing import Optional
 import numpy as np
+from quantcore.core.utils.config import get_config
 
 class ValueAtRisk:
     """Calculates Value at Risk (VaR) using different methodologies."""
     
-    def __init__(self, confidence_level: float = 0.95, horizon: int = 1):
-        self.confidence_level = confidence_level
-        self.horizon = horizon
+    def __init__(self, confidence_level: Optional[float] = None, horizon: Optional[int] = None):
+        config = get_config().quantcore.risk.var
+        self.confidence_level = confidence_level if confidence_level is not None else config.confidence_level
+        self.horizon = horizon if horizon is not None else config.horizon_days
         
     def historical(self, returns: np.ndarray) -> float:
         """Calculate Historical VaR from an array of returns."""

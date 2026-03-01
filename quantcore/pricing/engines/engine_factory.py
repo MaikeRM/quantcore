@@ -5,6 +5,7 @@ from quantcore.core.base.abc.instrument import FinancialInstrument
 from quantcore.core.base.abc.pricer import PricingEngine
 from .analytic.black_scholes import BlackScholesEngine
 from quantcore.core.utils.exceptions import EngineNotFoundError
+from quantcore.core.utils.config import get_config
 
 class EngineType(Enum):
     """Types of pricing engines available."""
@@ -51,6 +52,13 @@ class PricingEngineFactory:
         
     def _get_default_engine_type(self, instrument: FinancialInstrument) -> EngineType:
         instrument_class = type(instrument).__name__
+        cfg_default = get_config().quantcore.pricing.default_engine
+        
+        # If the YAML specifies a specific universal default instead of auto
+        if cfg_default != "auto":
+            return EngineType(cfg_default)
+
+        # Fallback to predefined instrument-specific engine
         if instrument_class in self._default_engines:
             return self._default_engines[instrument_class]
             
