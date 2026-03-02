@@ -66,7 +66,7 @@ class Settings:
         
         # quantcore/quantcore/core/utils/config/settings.py
         # root is 5 folders up
-        repo_root = os.path.abspath(os.path.join(current_dir, "../../../../.."))
+        repo_root = os.path.abspath(os.path.join(current_dir, "../../../.."))
         config_dir = os.path.join(repo_root, "config")
         
         # Fallback if library is installed
@@ -93,6 +93,11 @@ class Settings:
 
         # Convert to primitive dict for Pydantic validation
         cfg_dict = OmegaConf.to_container(cfg, resolve=True)
+        
+        # Hydra 1.1+ config group nesting fix:
+        # If the file puts 'quantcore:' inside it but is loaded as group 'quantcore', it nests
+        if "quantcore" in cfg_dict and "quantcore" in cfg_dict["quantcore"] and "version" in cfg_dict["quantcore"]["quantcore"]:
+            cfg_dict = {"quantcore": cfg_dict["quantcore"]["quantcore"]}
         
         try:
             # Validate with Pydantic
